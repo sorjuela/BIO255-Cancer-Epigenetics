@@ -1,0 +1,151 @@
+---
+title: "BIO255 - Data Analysis session"
+author: "Stephany Orjuela"
+date: "November 16, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(bsseq)
+```
+
+## Task Description
+
+You will identify differentially methylated regions (DMRs) using **bsseq**, a popular R package used for this purpose. The goals of today are:
+
+1. Learn a bit of **github**
+2. Learn basic R usage (variables, dataframes, import data, looking for help)
+3. Common assumptions made to identify DMRs
+4. Perform a differential analysis and interpret results
+
+Let's begin!
+
+## Study design description
+
+3 patients were diagnosed with a pre-colorectal cancerous lession from the sessil-serrated pathway (SSA). For each patient, a sample from the pre-cancerous mucosa and from their corresponding normal mucosa was taken. Each tissue was bisulfite treated (as you have done in the lab), to be later sequenced. Finally, methylation proportion for each CpG site was determined using a standard Bisulfite-sequencing pipeline. 
+
+* Can you remember (you can also look it up in your paper) what are the main steps in the pre-processing of bisulfite-sequencing data?
+
+## Obtaining the data
+
+Our data will not always be on our computer. We must be able to obtain the data from wherever it is.  We will download the data for this exercise from a github repository. To learn more about github click [here](https://guides.github.com/activities/hello-world/)
+
+from your terminal, create a working directory for today's session and move to it
+
+```{bash}
+mkdir BIO255
+cd BIO255
+```
+
+Download the data to your computer with the following command
+
+```{bash}
+github clone ***
+```
+
+## First steps in R
+
+R is mainly used for statistical analysis, but it is very flexible for data manipulation and plots. First, we will import a table from a .csv file
+
+```{r}
+data = read.table("design_matrix.csv") #Make a small design matrix with the right samples
+data
+```
+
+This table contains the information from each patient. 
+
+* Try to find the size of the table without manually counting
+
+* Try to save the first column of the table in a separate variable called **names**. *HINT:* you can either use [] or $, but remember they work in different ways.
+
+```{r, echo=F, include=F}
+names = data[,1]
+#data$V1
+```
+
+* If you can, try to put together the variable you just created with the column *Tissue*, in one variable
+
+```{r, echo=F, include=F}
+samples = paste0(names, data[,3])
+```
+
+
+## Analysis
+
+As explained before, we will detect DMRs as an initial step to identify potential cancer-specific markers. The final choice of such markers depends on a variety of factors, such as CpG content, primer design, statistical significance, among others.
+
+Here, we have the methylation and total Bisulfite sequencing read counts saved in an object called **BSr**. This is the data we will use to find the DMRs. 
+
+Have a look at the object
+
+```{r}
+load() ## a BSr like object with the right files already in it
+
+#samples = paste0(data$V1,".",files$V3) ##save above
+#pData(rrbs) = DataFrame(Type = files$V3) ##save before with object
+```
+
+In practice, you want your analysis to include more samples. However for today we will only use paired data from 3 patients for practical reasons.
+
+### Smoothing
+
+The main feature of *bsseq* is that it assumes the methylatin of CpGs closer to each other is correlated. Therefore before we detect DMRs, methylation levels (proportion of methylated reads per site) are smoothed across the genome.  
+
+This step takes a long time. You can take a break in the mean time :) 
+
+```{r}
+BS.fit <- BSmooth(rrbs, mc.cores = 2, verbose = TRUE)
+```
+
+
+### Filtering
+In practice, we want to maintain CpG sites which have more than 2 reads. Here, we filter out CpG sites that have less than that.  
+
+```{r}
+BS.cov <- getCoverage(BS.fit) ##fix depending on samples
+keepLoci.ex <- which(rowSums(BS.cov[, rrbs$Type == "NORMAL"] >= 2) >= 2 &
+                       rowSums(BS.cov[, rrbs$Type == "SSA"] >= 2) >= 2)
+BS.fit <- BS.fit[keepLoci.ex,]
+```
+
+### Calculate statistic and define DMRs
+
+Now for a bit of statistics. *bsseq* uses the fitted methylation levels to calculate bla bla***
+After this, we group all the CpG sites with a t-statistic beyond a particular cutoff. In this case, the cutoff corresponds to 4.6 which has been chosen based on the distribution of all the t-statistics. %Change?
+
+```{r}
+
+BS.tstat <- BSmooth.tstat(BS.fit, 
+                          group1 = s, #fix
+                          group2 = n, #fix
+                          estimate.var = "group2",
+                          local.correct = TRUE,
+                          verbose = TRUE)
+dmrs0 <- dmrFinder(BS.tstat, cutoff = c(-4.6, 4.6))
+```
+
+Depending on the analysis, you may want to filter your DMRs depending on the number of CpG sites in them, or the mean methylation difference. 
+
+* What filter is being applied here?
+
+```{r}
+dmrs <- subset(dmrs0.AN, n >= 3 & abs(meanDiff) >= 0.1)
+
+```
+
+### Visualization
+
+It is always a good idea to look at your DMRs. You can't look at all of them (you can, but you don't want that), so we will plot the top 200 DMRs, and put them in a pdf file.
+
+```{r}
+BS.fitred = BS.fit[,c(na,a)] 
+pData <- pData(BS.fitred)
+pData$col <- rep(c("#AADEDB", "#38678f"), each = length(na))
+pData(BS.fitred) <- pData
+pdf(file = "dmrs.BSmoothAll_top200_AN.pdf", width = 10, height = 5)
+plotManyRegions(BS.fitred, dmrs.AN[1:200,], extend = 1000, addRegions = dmrs.AN)
+dev.off()
+```
+
+##make more plots? like a volcano plot? histograms or whatever?
