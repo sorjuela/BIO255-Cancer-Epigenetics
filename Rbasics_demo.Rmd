@@ -41,7 +41,7 @@ cd BIO255
 
 Download the data to your computer with the following command
 ```{bash eval=FALSE}
-github clone https://github.com/sorjuela/BIO255-Cancer-Epigenetics.git
+git clone https://github.com/sorjuela/BIO255-Cancer-Epigenetics.git
 ```
 
 ### For windows users:
