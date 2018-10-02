@@ -24,10 +24,10 @@ In this practical you will learn about:
 * You should spend Thursday solving the exercise from Tuesday, and preparing a report due next week. The report should include a description of the week activities along with results. It should also include the findings from the bioinfo exercise (DMR annotation), and a description of the gene evaluated. Why/how do you think hypermethylation in this gene promotes tumorigensis? feel free to search the web for references to support your arguments. 
 * The report can be structured with: Small introduction, aims, methods, results, discussion, maximum 3 pages.
 
-## Information about overall course:
+## Information about evaluation:
 * The final grade will be calculated according to practical work (1/3), the written exam (1/3) and the presentation (1/3). 
 * *Written exam*: Tuesday 27.11 from 14:00-16:00, Location Y11E05
 * *Oral exam*: Wednesday 28.11 from 8:30-13:00, Location Y11E05
- - Group E: 11:45-12:25 
- - Group F: 12:30-13:00 
-* Each group will present a 12 minutes presentation showing the work done in both practicals (each student will present one of the practicals, the students decide how to distibute the presentations). This will be followed by 5 minutes discussion. Both students are present at the exam and will also participate in the discussion.
+ > > Group E: 11:45-12:25 
+ > > Group F: 12:30-13:00 
+* Each group will present a 12 minutes presentation showing the work done in both practicals (each student will present one of the practicals, the students decide how to distribute the presentations). This will be followed by 5 minutes discussion. Both students are present at the exam and will also participate in the discussion.
