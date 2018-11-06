@@ -9,10 +9,21 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Use similar code from `AnnotationandGRanges_demo.Rmd` and annotate the DMR to be analyzed during the practical.
+Use similar code from `AnnotationandGRanges_demo.Rmd` and annotate the DMR to be analyzed during the lab practical. Plotting the region is OPTIONAL.
 
 ```{r eval = F}
 
-DMR <- GRanges(IRanges())
+chr <- "chr7"
+start <- 37956000
+end <- start + 100
 ```
 
+* How many different CpG-related annotations does this region annotate to?
+* How many different genes does this region annotate to?
+* What different sections (type) of this gene does the region belong to?
+* Why does the `hg19_genes_1to5kb` annotation type appear more than once?
+* What will happen if your region is bigger? smaller?
+
+If you have questions and I'm not around, send an email to `orjuela@imcr.com`. Send your answers to the same email in an `.Rmd` file.  
+
+OPTIONAL: Submit a pull request to the `sorjuela/BIO255-Cancer-Epigenetics` repository with your answers.
