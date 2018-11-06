@@ -19,7 +19,7 @@ In this practical you will learn about:
 |14:31 - 15:00|Coffee break|Lab session||Lab session|
 |15:01 - 16:00|Bioinfo session 2: Genomic Ranges|Lab session (could extend)|Lab session: Y17 K-32|Lab session (could extend)|
 
-* For Tuesday you must bring a laptop with RStudio installed, preferibly with R and all packages up to date (`ggplot2`, `GenomicRanges`, `annotatr`).
+* For Tuesday you must bring a laptop preferably with an updated `RStudio` (latest version 1.1.463), `R` (latest version 3.5.1) and all necessary packages installed (`ggplot2`, `GenomicRanges`, `annotatr`, `Gviz`, `EnsDb.Hsapiens.v75`). 
 * You should spend Thursday solving the exercise from Tuesday, and preparing a report due on the following **Monday**. The report should include a description of the week activities along with results. It should also include the findings from the bioinfo exercise (DMR annotation), and a description of the gene evaluated. Why/how do you think hypermethylation in this gene could promote tumorigensis? feel free to search the web for references to support your arguments. 
 * The report can be structured with: Small introduction, aims, methods, results, discussion. Maximum 3 pages in pdf format.
 
