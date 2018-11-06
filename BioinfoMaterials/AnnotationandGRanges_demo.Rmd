@@ -14,18 +14,21 @@ knitr::opts_chunk$set(echo = TRUE)
 ## What is and how to create a `GRanges` object
 
 Each genomic range is described by a *chromosome name*, a *start*, an *end*, and a *strand*. 
-* *start* and *end* are both 1-based positions relative to the 5’ end of the plus strand of the chromosome, even when the range is on the minus strand.
-* *start* and *end* are both considered to be included in the interval (except when the
+
+ * *start* and *end* are both 1-based positions relative to the 5’ end of the plus strand of the chromosome, even when the range is on the minus strand.
+ * *start* and *end* are both considered to be included in the interval (except when the
 range is empty). 
-* The *width* of the range is the number of genomic positions included in it. So *width = end - start + 1*.
-* *end* is always >= *start*, except for empty ranges (a.k.a.  zero-width ranges) where *end = start - 1*.
+ * The *width* of the range is the number of genomic positions included in it. So *width = end - start + 1*.
+ * *end* is always >= *start*, except for empty ranges (a.k.a.  zero-width ranges) where *end = start - 1*.
 
 A `GRanges` is an easy way to store this type of information. It can include three parts: `GRanges` (a container for positions or regions), metadata (an optional table of information), and `seqinfo` (information about the sequences). 
 
 ```{r}
 #To install:
-#source("https://bioconductor.org/biocLite.R")
-#biocLite("GenomicRanges")
+#if (!requireNamespace("BiocManager", quietly = TRUE))
+#    install.packages("BiocManager")
+#BiocManager::install("GenomicRanges", version = "3.8")
+
 
 suppressPackageStartupMessages(library(GenomicRanges))
 
@@ -85,40 +88,29 @@ seqinfo(gr)
 
 ```
 
-## How to overlap two different `GRanges` objects
-
-```{r fig.width=10}
-
-gr2 <- GRanges(seqnames = c("chr1", "chr1"),
-              ranges = IRanges(start = c(5, 16),
-                               end = c(5, 20)),
-              strand = c("+", "+"))
-
-# findOverlaps
-over <- findOverlaps(gr, gr2)
-over
-
-queryHits(over)
-```
 
 # Annotating regions (where is my region in the genome?)
 
-There are many packages available to annotate regions, here we will use a new package called `annotatr`
+In some exploratory analysis, we tipically obtain a genomic region without any prior knowledge of it. In other cases, if we know that the region is to close a gene of interest, we might be want to know if it's close to other genes, CpG islands, promoters, etc., to have a better understanding of the region's genomic environment. This is why we annotate.
+
+There are many packages available to annotate regions, here we will use a new package called `annotatr`. [Manual here](http://bioconductor.org/packages/release/bioc/vignettes/annotatr/inst/doc/annotatr-vignette.html)
+
 
 ```{r}
 #To install:
-#source("https://bioconductor.org/biocLite.R")
-#biocLite("annotatr")
+#BiocManager::install("annotatr", version = "3.8")
 
 library(annotatr)
 ```
 
-The package uses built-in annotations including CpG annotations, genic annotations. We will use a region defined in a `GRanges` object to determine what gene it corresponds to, and where it is within this gene.
+The package uses built-in annotations including CpG annotations and genic annotations. We will use a region defined in a `GRanges` object as input.
+
+Here we use the `hg19` (or GRCh37) genome build for Human, but just remember there is a more recent genome build (`hg38`). You should always be aware of the genome build you use across the entire analysis, and not mix them up.
 
 ```{r}
 #My region
-DMR <- GRanges("chr3", IRanges(36993332, 37050918), strand = "+")
-  
+DMR <- GRanges("chr11", IRanges(7273490, 7273590), strand = "*")
+
 #CpG annotations
 annotscpg <- c("hg19_cpg_islands", "hg19_cpg_shores", "hg19_cpg_shelves", "hg19_cpg_inter")
 
@@ -127,14 +119,19 @@ annotations <- build_annotations(genome = 'hg19', annotations = annotscpg)
 dm_annotated_cpg = annotate_regions(
   regions = DMR,
   annotations = annotations,
-  ignore.strand = FALSE,
+  ignore.strand = TRUE,
   quiet = FALSE)
 
 dm_annotated_cpg
-
 ```
 
-Here we use the `hg19` (or GRCh37) genome build for Human, but just remember there is a more recent genome build (`hg38`). You should always be aware of the genome build you use across the entire analysis, and mix them up.
+The output is also a `GRanges` object, with a bit more complexity. To actually see the annotations we have to access the column `annot`
+
+```{r}
+dm_annotated_cpg$annot
+```
+
+Here we see this region overlaps a CpG island. Now we look at genic annotations:
 
 ```{r}
 #genic annotations
@@ -144,14 +141,57 @@ annotsgene <- c("hg19_genes_promoters", "hg19_genes_3UTRs", "hg19_genes_introns"
 
 annotations <- build_annotations(genome = 'hg19', annotations = annotsgene)
 
-# dm_annotated_gene <- annotate_regions(
-#   regions = DMR,
-#   annotations = annotations,
-#   ignore.strand = FALSE,
-#   quiet = FALSE)
-# 
-# df_annotated_gene
+dm_annotated_gene <- annotate_regions(
+  regions = DMR,
+  annotations = annotations,
+  ignore.strand = TRUE,
+  quiet = FALSE)
+
+dm_annotated_gene$annot
 ```
 
-something about the region.
-You can look at other examples of annotation in the packages' [vignette](http://bioconductor.org/packages/release/bioc/vignettes/annotatr/inst/doc/annotatr-vignette.html)
+Here we see that the region is most likely within the SYT9 gene, however the location within the gene is a bit tricky. We see some hits for `exon` and `intron`, and 1 hit for `CDS`. This suggests the region is somewhere within the coding region of SYT9, but it's not very clear where. To determine this we can make a plot to help us interprete the regions location. For this we use the library `Gviz` which helps us plot the actual gene in an easier way.
+
+```{r}
+#BiocManager::install("Gviz", version = "3.8")
+#BiocManager::install("EnsDb.Hsapiens.v75", version = "3.8")
+
+suppressPackageStartupMessages(library(Gviz))
+suppressPackageStartupMessages(library(EnsDb.Hsapiens.v75))
+
+#Get gene locations
+edb <- EnsDb.Hsapiens.v75
+gr <- getGeneRegionTrackForGviz(edb, chromosome = "chr11",
+                                start = 7260009, end = 7490273) #locations of the gene we found
+
+#Turn into a Gviz track
+geneTrack <- GeneRegionTrack(gr, collapseTranscripts = F, fill = "blue")
+
+#Turn annotations into a Gviz track
+aTrack <- AnnotationTrack(dm_annotated_gene$annot, group = dm_annotated_gene$annot$id)
+
+#Turn our region into a Gviz track
+myTrack <- AnnotationTrack(DMR, fill = "red")
+
+#plot all track together
+plotTracks(list(geneTrack, myTrack, aTrack), 
+           from = min(start(dm_annotated_gene$annot), start(DMR)), 
+           to = max(end(dm_annotated_gene$annot), end(DMR)),
+           groupAnnotation = "group")
+```
+
+The biggest annotations (`intron`) make it a bit difficult to visualize. Let's take them out
+
+```{r}
+
+geneTrack <- GeneRegionTrack(gr, collapseTranscripts = F, fill = "blue")
+aTrack <- AnnotationTrack(dm_annotated_gene$annot, group = dm_annotated_gene$annot$id)
+myTrack <- AnnotationTrack(DMR, fill = "red")
+
+plotTracks(list(geneTrack, myTrack, aTrack), 
+           from = min(start(dm_annotated_gene$annot[-c(4,5,6)]), start(DMR)), 
+           to = max(end(dm_annotated_gene$annot[-c(4,5,6)]), end(DMR)),
+           groupAnnotation = "group")
+```
+
+We can see now that our region actually overlaps both an intron and an exon in 2 of the transcripts of gene SYT9. In the other transcripts it only overlaps the intron. This is just to ilustrate that annotating can be an arbitrary task, and in this case some people migh say the region is on the exon, others on the intron, and others might not really care as long as they know it is on gene SYT9. In the end, it depends on your question of interest. 
