@@ -15,7 +15,7 @@ In this practical you will learn about:
 |-------------|---|---|---|---|
 |9:00 - 12:00||Lab session: Y17 K-32|Self-study: Report and presentation preparation, and bioinfo exercise| Lab session: Y17 K-32|
 |12:01 - 13:00||Lunch break (time could change)||Lunch break (time could change)|
-|13:01 - 14:30|Bioinfo session 1: R basics|Lab session||Lab session|
+|13:01 - 14:30|Bioinfo session 1: R basics Y17 K-03a-c|Lab session||Lab session|
 |14:31 - 15:00|Coffee break|Lab session||Lab session|
 |15:01 - 16:00|Bioinfo session 2: Genomic Ranges|Lab session (could extend)|Lab session: Y17 K-32|Lab session (could extend)|
 
