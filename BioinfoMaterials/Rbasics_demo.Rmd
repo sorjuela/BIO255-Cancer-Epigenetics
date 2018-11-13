@@ -1,8 +1,10 @@
 ---
-title: "Session 1: Basics in R (review)"
+title: 'Session 1: Basics in R (review)'
 author: "Stephany Orjuela"
 date: "November 13, 2018"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 
@@ -153,11 +155,6 @@ head(dat) ## mtcars
 library(ggplot2)
 ggplot(data = dat, aes(x=hp, y=qsec)) + geom_point()
 ggplot(data = dat, aes(x=hp, y=qsec)) + geom_point() + aes(color = am)
-
-## color by group
-myVar <- "am"
-ggplot(data = dat, aes(x=hp, y=qsec)) + geom_point() + aes(color = myVar)
-ggplot(data = dat, aes(x=hp, y=qsec)) + geom_point() + aes_string(color = myVar)
 
 ## add labels
 ggplot(data = dat, aes(x=hp, y=qsec)) + geom_point() + aes_string(color = myVar) + labs(x="Power", y="Time",title="bla")
