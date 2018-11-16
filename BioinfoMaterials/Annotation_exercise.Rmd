@@ -24,6 +24,6 @@ end <- start + 100
 * Why does the `hg19_genes_1to5kb` annotation type appear more than once?
 * What will happen if your region is bigger? smaller?
 
-If you have questions and I'm not around, send an email to `orjuela@imcr.com`. Send your answers to the same email in an `.Rmd` file.  
+If you have questions and I'm not around, send an email to `orjuela@imcr.uzh.ch`. Send your answers to the same email in an `.Rmd` file.  
 
 OPTIONAL: Submit a pull request to the `sorjuela/BIO255-Cancer-Epigenetics` repository with your answers.
